@@ -1,23 +1,111 @@
+/* Base Reset & Global Styles */
 body {
     font-family: 'Arial', sans-serif;
-    margin: 20px;
-    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom right, #5a78ff, #a16eff);
+    color: #fff;
 }
 
+/* Centering and layout */
 .container {
-    max-width: 800px;
+    max-width: 400px;
     margin: auto;
+    padding: 20px;
 }
 
-.card {
+/* Title and subtitle styling */
+h1, h2 {
+    text-align: center;
+    font-weight: bold;
     margin-bottom: 20px;
 }
 
-h1, h2 {
-    text-align: center;
+/* Card-style boxes */
+.card {
+    background-color: #ffffff;
+    color: #333;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
+/* Button style */
 .btn {
     width: 100%;
     margin-top: 10px;
+    padding: 12px 20px;
+    background-color: #ff8c40;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #e6762c;
+}
+
+/* Progress Bar */
+.progress-bar {
+    height: 10px;
+    border-radius: 5px;
+    background: #e0e0e0;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-bar-fill {
+    width: 40%; /* Example percentage */
+    height: 100%;
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+}
+
+/* Chat message bubble */
+.chat-bubble {
+    background-color: #ffffff;
+    color: #333;
+    border-radius: 16px;
+    padding: 10px 15px;
+    max-width: 80%;
+    margin-bottom: 10px;
+}
+
+/* User message */
+.chat-bubble.user {
+    background-color: #5a78ff;
+    color: white;
+    align-self: flex-end;
+}
+
+/* Message container */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Navigation footer */
+.footer-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    justify-content: space-around;
+    background-color: white;
+    border-top: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.footer-nav button {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #5a78ff;
+    font-weight: bold;
 }
