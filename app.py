@@ -4,15 +4,41 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'lilbrain_api_key'
-conn = sqlite3.connect('lilbrain.db', check_same_thread=False)
-cursor = conn.cursor()
 
-# ✅ Home route (for Render to load homepage)
+# ✅ Safe DB connection for each request
+def get_db():
+    conn = sqlite3.connect('lilbrain.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# === HTML PAGE ROUTES ===
+
 @app.route("/")
 def home():
     return render_template("home.html")
 
-# ✅ Chatbot logic
+@app.route("/quiz")
+def quiz():
+    return render_template("quiz.html")
+
+@app.route("/leaderboard-page")
+def leaderboard_page():
+    db = get_db()
+    leaderboard = db.execute("SELECT username, xp, streak FROM users ORDER BY xp DESC").fetchall()
+    return render_template("leaderboard.html", leaderboard=leaderboard)
+
+@app.route("/chatbot")
+def chatbot_page():
+    return render_template("chatbot.html")
+
+@app.route("/admin")
+def admin_page():
+    db = get_db()
+    questions = db.execute("SELECT id, category, question_text, correct_answer, age_group FROM questions").fetchall()
+    return render_template("admin.html", questions=questions)
+
+# === CHATBOT LOGIC ===
+
 def smartie_response(message):
     message = message.lower()
     if "powerhouse" in message and "cell" in message:
@@ -22,15 +48,20 @@ def smartie_response(message):
     else:
         return "That's a great question! I'll get smarter just like you."
 
-# ✅ API routes
+# === API ROUTES ===
+
 @app.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
+    db = get_db()
+    cursor = db.cursor()
     cursor.execute("SELECT username, xp, streak FROM users ORDER BY xp DESC")
     data = [{"username": r[0], "xp": r[1], "streak": r[2]} for r in cursor.fetchall()]
     return jsonify(data)
 
 @app.route('/api/quiz/start', methods=['POST'])
 def start_quiz():
+    db = get_db()
+    cursor = db.cursor()
     payload = request.get_json()
     username = payload.get("username")
     category = payload.get("category")
@@ -54,6 +85,8 @@ def start_quiz():
 
 @app.route('/api/quiz/submit', methods=['POST'])
 def submit_quiz():
+    db = get_db()
+    cursor = db.cursor()
     payload = request.get_json()
     username = payload.get("username")
     answers = payload.get("answers", {})
@@ -69,7 +102,7 @@ def submit_quiz():
     new_xp = xp + score
     new_streak = streak + 1 if score == full_score else 0
     cursor.execute("UPDATE users SET xp = ?, streak = ? WHERE username = ?", (new_xp, new_streak, username))
-    conn.commit()
+    db.commit()
     if score == 0:
         reaction = "Oops! Time to recharge that lil brain!"
     elif score < full_score:
@@ -80,6 +113,8 @@ def submit_quiz():
 
 @app.route('/api/chatbot', methods=['POST'])
 def chatbot():
+    db = get_db()
+    cursor = db.cursor()
     payload = request.get_json()
     username = payload.get("username")
     message = payload.get("message")
@@ -93,6 +128,8 @@ def chatbot():
 
 @app.route('/api/admin/questions', methods=['GET'])
 def list_questions():
+    db = get_db()
+    cursor = db.cursor()
     cursor.execute("SELECT id, category, question_text, correct_answer, age_group FROM questions")
     q = cursor.fetchall()
     return jsonify([{
@@ -100,7 +137,7 @@ def list_questions():
         "answer": r[3], "age_group": r[4]
     } for r in q])
 
-# ✅ Run Flask using the PORT Render provides
+# ✅ RUN FLASK ON RENDER
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
