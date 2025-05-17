@@ -1,11 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import sqlite3
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'lilbrain_api_key'
 conn = sqlite3.connect('lilbrain.db', check_same_thread=False)
 cursor = conn.cursor()
 
+# ✅ Home route (for Render to load homepage)
+@app.route("/")
+def home():
+    return render_template("home.html")
+
+# ✅ Chatbot logic
 def smartie_response(message):
     message = message.lower()
     if "powerhouse" in message and "cell" in message:
@@ -15,6 +22,7 @@ def smartie_response(message):
     else:
         return "That's a great question! I'll get smarter just like you."
 
+# ✅ API routes
 @app.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
     cursor.execute("SELECT username, xp, streak FROM users ORDER BY xp DESC")
@@ -92,5 +100,7 @@ def list_questions():
         "answer": r[3], "age_group": r[4]
     } for r in q])
 
+# ✅ Run Flask using the PORT Render provides
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
